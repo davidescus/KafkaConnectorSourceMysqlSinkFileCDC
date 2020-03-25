@@ -5,13 +5,14 @@ https://docs.confluent.io/5.0.0/installation/docker/docs/installation/connect-av
 
 ### Environment used for test
 * Ubuntu 18.04
-* VirtualBox 
-* Kubectl
-* Minikube
+* Kubectl 1.17.4
+* Kubernetes 1.17.3
+* VirtualBox 6.1
+* Minikube 1.8.2 
 
 ### What it does:
-* Source table ```test``` from MySql into Kafka
-* Sink from Kafka to file
+* Source records from MySql table ```test``` into Kafka
+* Sink data from kafka into file
 
 ### How it works:
 * clone project && go to ```src``` dir
@@ -36,7 +37,6 @@ use connect_test;
 INSERT INTO test (name, email, department) VALUES ('I-like-kubernetes', 'name@domain.com', 'engineering');
 ``` 
 * entry that you just created must be visible by viewing results again
-
 
 ### TODO:
 * Use kubernetes secrets for password management
