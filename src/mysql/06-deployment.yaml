@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: mysql
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - image: mysql:5.7
+          name: mysql
+          env:
+            # TODO manage secrets
+            - name: MYSQL_ROOT_PASSWORD
+              value: confluent
+            - name: MYSQL_USER
+              value: confluent
+            - name: MYSQL_PASSWORD
+              value: confluent
+            - name: MYSQL_DATABASE
+              value: connect_test
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            # TODO ask Daniel why not working with multiple volumes mounted
+#            - name: mysql-persistent-storage
+#              mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+#        - name: mysql-persistent-storage
+#          persistentVolumeClaim:
+#            claimName: mysql-pvc
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config

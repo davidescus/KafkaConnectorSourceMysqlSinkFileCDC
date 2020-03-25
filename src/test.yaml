@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+spec:
+  containers:
+    - name: mysql
+      image: mysql:5.7
+      ports:
+        - containerPort: 3306
+      env:
+        # TODO manage secrets
+        - name: MYSQL_ROOT_PASSWORD
+          value: confluent
+        - name: MYSQL_USER
+          value: confluent
+        - name: MYSQL_PASSWORD
+          value: confluent
+        - name: MYSQL_DATABASE
+          value: connect_test
+      volumeMounts:
+        - name: mysql-initdb
+          mountPath: /docker-entrypoint-initdb.d
+  volumes:
+    - name: mysql-initdb
+      configMap:
+        name: mysql-initdb-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+data:
+  initdb.sql: |
+    CREATE TABLE friends (id INT, name VARCHAR(256), age INT, gender VARCHAR(3));
+    INSERT INTO friends VALUES (1, 'John Smith', 32, 'm');
+    INSERT INTO friends VALUES (2, 'Lilian Worksmith', 29, 'f');
+    INSERT INTO friends VALUES (3, 'Michael Rupert', 27, 'm');

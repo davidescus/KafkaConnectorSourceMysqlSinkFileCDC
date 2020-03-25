@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-kafka
+  namespace: kafka
+  labels:
+    app: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      initContainers:
+        - name: app-wait-zookeeper
+          image: busybox
+          command:
+            - /bin/sh
+            - -c
+            - 'until [ "imok" = "$(echo ruok | nc -w 1 app-zookeeper.zookeeper.svc.cluster.local 32181)" ] ; do echo waiting for zookeeper ; sleep 1 ; done'
+          env:
+            - name: SERVICE_TYPE
+              value: "init"
+      containers:
+        - image: confluentinc/cp-kafka:5.0.0
+          name: kafka-app
+          env:
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: app-zookeeper.zookeeper.svc.cluster.local:32181
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://app-kafka.kafka.svc.cluster.local:29092,LISTENER_X://localhost:9092"
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "PLAINTEXT:PLAINTEXT,LISTENER_X:PLAINTEXT"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "LISTENER_X"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+          ports:
+            - containerPort: 29092
+              name: kafka
+            - containerPort: 9092
+              name: interbroker
+#            - containerPort: 9093
+#              name: kafka-2
+
+#          volumeMounts:
+#            - name: kafka-persistent-storage
+#              mountPath: /var/lib/kafka/data
+#      volumes:
+#        - name: kafka-persistent-storage
+#          persistentVolumeClaim:
+#            claimName: kafka-pvc

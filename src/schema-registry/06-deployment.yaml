@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-schema-registry
+  namespace: schema-registry
+  labels:
+    app: schema-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schema-registry
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: schema-registry
+    spec:
+      initContainers:
+        - name: app-wait-kakfa
+          image: busybox
+          command:
+            - /bin/sh
+            - -c
+            - 'until [ "1" = "$(echo dump | nc -v app-zookeeper.zookeeper.svc.cluster.local 32181 | grep brokers | wc -l)" ] ; do echo waiting for zookeeper ; sleep 1 ; done'
+      containers:
+         - image: confluentinc/cp-schema-registry:5.0.0
+           name: schema-registry-app
+           env:
+             - name: SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL
+               value: "app-zookeeper.zookeeper.svc.cluster.local:32181"
+             - name: SCHEMA_REGISTRY_HOST_NAME
+               value: "localhost"
+             - name: SCHEMA_REGISTRY_LISTENERS
+               value: "http://localhost:8081"
+           ports:
+             - containerPort: 8081
+               name: schema-registry

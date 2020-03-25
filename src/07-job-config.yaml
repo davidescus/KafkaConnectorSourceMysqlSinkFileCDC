@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-kafka-connect
+#  namespace: kafka-connect
+  labels:
+    app: kafka-connect
+spec:
+  template:
+    metadata:
+      labels:
+        app: kafka-connect
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: app-wait-kakfa
+          image: yauritux/busybox-curl
+          command:
+            - /bin/sh
+            - -c
+            - 'until [ "200" = "$(curl -s -o /dev/null -I -w "%{http_code}" app-kafka-connect.kafka-connect.svc.cluster.local:28083/connectors)" ] ; do echo waitingForKafkaConnect ; sleep 1 ; done'
+      containers:
+        - image: davidescus/busybox-curl-create-connectors:v2
+          name: kafka-connect-job
+          command: ["/bin/sh", "/tmp/create-connectors.sh"]
