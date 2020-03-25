@@ -28,7 +28,6 @@ spec:
             - name: SERVICE_TYPE
               value: "init"
       containers:
-#        - image: confluentinc/cp-kafka-connect:latest
         - image: davidescus/kafka-connector-source-mysql
           name: kafka-connect-app
           env:

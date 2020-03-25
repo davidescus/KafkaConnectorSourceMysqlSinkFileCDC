@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: job-kafka-connect
-#  namespace: kafka-connect
+  namespace: kafka-connect
   labels:
     app: kafka-connect
 spec:

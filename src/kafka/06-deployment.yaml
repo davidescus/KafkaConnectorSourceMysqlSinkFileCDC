@@ -46,9 +46,6 @@ spec:
               name: kafka
             - containerPort: 9092
               name: interbroker
-#            - containerPort: 9093
-#              name: kafka-2
-
 #          volumeMounts:
 #            - name: kafka-persistent-storage
 #              mountPath: /var/lib/kafka/data
